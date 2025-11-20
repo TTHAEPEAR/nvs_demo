@@ -1,0 +1,2575 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nuvestra – Student Investment Platform</title>
+    
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #1EC6C9;
+        --primary-glow: rgba(30, 198, 201, 0.5);
+        --bg-deep: #02040a;
+        --glass-bg: rgba(20, 25, 40, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Prompt', sans-serif;
+        background-color: #000;
+        color: #fff;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    .font-eng { font-family: 'Inter', sans-serif; }
+
+    .device-frame {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: radial-gradient(circle at 50% 30%, #1a233a 0%, #000 80%);
+    }
+
+    .app-screen {
+        width: 100%;
+        max-width: 414px;
+        height: 100%;
+        max-height: 896px;
+        background: linear-gradient(180deg, #0a0f1a 0%, #02040a 100%);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 60px rgba(30, 198, 201, 0.08), 0 0 120px rgba(0, 0, 0, 0.8);
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (min-width: 420px) {
+        .app-screen {
+            border-radius: 48px;
+            height: 92vh;
+            border: 8px solid rgba(15, 19, 31, 0.8);
+        }
+    }
+
+    .glass-card {
+        background: rgba(20, 25, 40, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+        background: rgba(20, 25, 40, 0.85);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 12px 48px 0 rgba(30, 198, 201, 0.1);
+    }
+
+    .live-badge { animation: pulse-dot 2s infinite; }
+
+    @keyframes pulse-dot {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .hide-scroll::-webkit-scrollbar { display: none; }
+    .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .bottom-sheet {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(180deg, #0f131f 0%, #0a0f1a 100%);
+        border-radius: 30px 30px 0 0;
+        transform: translateY(110%);
+        transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        z-index: 100;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 -20px 60px rgba(0,0,0,0.8);
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideUp 0.4s ease-out;
+    }
+    .bottom-sheet.active { transform: translateY(0); }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 90;
+    }
+    .overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .btn-press {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .btn-press:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-press:active {
+        transform: scale(0.95);
+        transition: 0.05s;
+    }
+
+    .btn-press:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .toast {
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(16, 185, 129, 0.85));
+        color: white;
+        padding: 14px 28px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: 'Inter', sans-serif;
+    }
+    .toast.active {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .page-section {
+        display: none;
+        opacity: 0;
+        animation: slideUp 0.3s ease-out;
+    }
+    .page-section.active {
+        display: block;
+        opacity: 1;
+    }
+
+    .chip {
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 6px 12px;
+        font-size: 11px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.05);
+        transition: all 0.2s;
+    }
+
+    .chip:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: var(--primary);
+    }
+
+    .chip-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+    }
+
+    .risk-pill {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 999px;
+        transition: all 0.2s;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: #9CA3AF;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stat-value {
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 2px;
+    }
+
+    .skeleton {
+        background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+        border-radius: 8px;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .fade-in {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    input[type="number"], input[type="text"], select {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: white;
+        padding: 14px;
+        border-radius: 14px;
+        width: 100%;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    input[type="number"]::placeholder, input[type="text"]::placeholder {
+        color: rgba(255,255,255,0.3);
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(30, 198, 201, 0.15);
+        background: rgba(255,255,255,0.08);
+    }
+
+    .transaction-item {
+        border-left: 3px solid;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .transaction-item:hover {
+        background: rgba(255,255,255,0.03);
+        transform: translateX(4px);
+    }
+
+    .quest-progress {
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card {
+        background: rgba(30, 198, 201, 0.08);
+        border: 1px solid rgba(30, 198, 201, 0.2);
+        padding: 16px;
+        border-radius: 16px;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+        background: rgba(30, 198, 201, 0.12);
+        border-color: rgba(30, 198, 201, 0.3);
+    }
+
+    .badge-success {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        margin: 16px 0;
+    }
+</style></head>
+<body>
+
+<div class="device-frame">
+    <div class="app-screen">
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-msg">Action Successful</span>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="main-overlay" onclick="closeAllModals()"></div>
+
+    <!-- Top Bar -->
+    <div class="absolute top-0 w-full z-30 px-6 pt-12 pb-6 bg-gradient-to-b from-[#02040a] via-[#02040a]/80 to-transparent">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button class="relative w-11 h-11 btn-press group" onclick="openProfileSettings()" aria-label="Profile">
+                    <svg class="w-full h-full transform -rotate-90 transition-opacity group-hover:opacity-70">
+                        <circle cx="22" cy="22" r="19" stroke="#1f2937" stroke-width="1.5" fill="none"></circle>
+                        <circle cx="22" cy="22" r="19" stroke="#F5B947" stroke-width="2" fill="none" stroke-dasharray="113" stroke-dashoffset="30" id="level-progress"></circle>
+                    </svg>
+                    <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Student" class="absolute top-1.5 left-1.5 w-7 h-7 rounded-lg bg-gray-800 ring-2 ring-[#F5B947]/30" alt="Student Avatar">
+                    <div class="absolute -bottom-0.5 -right-0.5 bg-gradient-to-br from-[#F5B947] to-[#F59E0B] text-[7px] font-bold text-black px-1.5 py-0.5 rounded-full border-2 border-[#02040a]" id="user-level">LV.5</div>
+                </button>
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-[10px] text-gray-500 tracking-widest uppercase font-eng font-semibold">Nuvestra</span>
+                    <span class="text-sm font-bold font-eng text-white" id="user-name">Nui Student</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="glass-card rounded-full flex text-[10px] font-eng font-semibold overflow-hidden border">
+                    <button id="mode-student" class="px-3 py-1.5 bg-white/10 text-white transition-all hover:bg-white/15">Student</button>
+                    <button id="mode-investor" class="px-3 py-1.5 text-gray-400 hover:text-gray-300 transition-all">Investor</button>
+                </div>
+
+                <button class="w-9 h-9 rounded-full glass-card flex items-center justify-center text-gray-400 btn-press relative hover:text-white group transition-colors" 
+                    onclick="openNotifications()" aria-label="Notifications">
+                    <i class="fa-regular fa-bell group-hover:fa-solid transition-all"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" id="notif-badge"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll Container -->
+    <div class="flex-1 overflow-y-auto hide-scroll pt-28 pb-32 px-6" id="scroll-container">
+        
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page-section active" aria-label="Student Home">
+            <!-- Portfolio Overview Card -->
+            <div class="glass-card rounded-3xl p-6 mb-8 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-[#1EC6C9]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs text-gray-400 tracking-widest uppercase font-eng font-semibold">Total Portfolio</span>
+                        <span class="w-2 h-2 rounded-full bg-green-500 live-badge"></span>
+                    </div>
+                    <div class="text-5xl font-bold font-eng tracking-tight text-white mb-3" id="total-balance">
+                        ฿ 12,450.00
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-sm font-bold badge-success px-3 py-1.5 rounded-lg flex items-center gap-1.5" id="total-change">
+                            <i class="fa-solid fa-arrow-trend-up text-xs"></i> <span id="change-amount">฿ 840.50</span> <span class="text-gray-300">(<span id="change-percent">7.2%</span>)</span>
+                        </span>
+                        <span class="text-xs text-gray-500">Today</span>
+                    </div>
+                    <div class="section-divider"></div>
+                    <div class="text-xs text-gray-400 mt-4 leading-relaxed">
+                        <span class="text-[#1EC6C9] font-semibold">Goal:</span> Complete year 4 with ฿30,000+ portfolio
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="glass-card rounded-2xl p-4 mb-8 relative">
+                <div class="flex justify-between items-center px-2 pb-4">
+                    <h3 class="text-sm font-semibold text-gray-200">Performance</h3>
+                    <div class="flex gap-2 text-[10px] font-eng">
+                        <button class="chart-period px-2.5 py-1.5 rounded-lg text-[#1EC6C9] bg-white/10" data-period="1W" onclick="changeChartPeriod('1W', this)">1W</button>
+                        <button class="chart-period px-2.5 py-1.5 rounded-lg text-gray-500 hover:text-gray-300" data-period="1M" onclick="changeChartPeriod('1M', this)">1M</button>
+                        <button class="chart-period px-2.5 py-1.5 rounded-lg text-gray-500 hover:text-gray-300" data-period="1Y" onclick="changeChartPeriod('1Y', this)">1Y</button>
+                    </div>
+                </div>
+                <div class="h-40 w-full relative">
+                    <canvas id="mainChart" aria-label="Portfolio performance chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-3 gap-3 mb-8">
+                <div class="stat-card">
+                    <div class="stat-label">Gains</div>
+                    <div class="stat-value text-[#10b981]">฿840.50</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Investment</div>
+                    <div class="stat-value">฿11,610</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Growth Rate</div>
+                    <div class="stat-value text-[#1EC6C9]">7.2%</div>
+                </div>
+            </div>
+
+            <!-- Tuition to Safe Explainer -->
+            <div class="glass-card rounded-2xl p-4 mb-6 flex items-start gap-3 border-l-4 border-l-[#1EC6C9]">
+                <div class="w-10 h-10 rounded-xl bg-[#1EC6C9]/20 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-graduation-cap text-[#1EC6C9]"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs text-gray-400 mb-1 font-eng font-semibold">Automatic Investment</div>
+                    <div class="text-sm font-semibold mb-2">10% of tuition in Safe Fund</div>
+                    <div class="text-xs text-gray-400 leading-relaxed mb-3">Your tuition becomes your first investment portfolio automatically</div>
+                    <div class="text-xs font-eng">
+                        <span class="text-gray-500">This semester: </span>
+                        <span class="font-bold text-white" id="tuition-contribution">฿ 4,200</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-base font-bold">Recent Activity</h3>
+                    <button class="text-xs text-[#1EC6C9] font-eng font-semibold btn-press hover:text-[#5bfdfd]" onclick="switchTab('transactions', null)">
+                        View All <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i>
+                    </button>
+                </div>
+                <div id="recent-transactions" class="space-y-2">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+
+            <!-- Assets Section -->
+            <div class="mb-4">
+                <h3 class="text-base font-bold mb-4">Your Assets</h3>
+
+                <!-- Safe Fund -->
+                <button class="glass-card p-4 rounded-2xl flex items-center justify-between btn-press cursor-pointer group border-l-4 border-l-[#1EC6C9] mb-3 hover:bg-white/[0.08]"
+                    onclick="openAssetDetail('safe')">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1EC6C9]/30 to-[#1EC6C9]/10 flex items-center justify-center text-[#1EC6C9] group-hover:from-[#1EC6C9]/40 transition-colors">
+                            <i class="fa-solid fa-shield-halved text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm">Safe Fund</div>
+                            <div class="text-xs text-gray-400 font-eng">Bonds • Low Risk</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold font-eng text-sm" id="safe-value">฿ 2,500.00</div>
+                        <div class="text-xs text-[#10b981] font-eng font-semibold" id="safe-change">+12.50</div>
+                    </div>
+                </button>
+
+                <!-- Growth ETF -->
+                <button class="glass-card p-4 rounded-2xl flex items-center justify-between btn-press cursor-pointer group border-l-4 border-l-[#5C6CFF] mb-3 hover:bg-white/[0.08]"
+                    onclick="openAssetDetail('growth')">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#5C6CFF]/30 to-[#5C6CFF]/10 flex items-center justify-center text-[#5C6CFF] group-hover:from-[#5C6CFF]/40 transition-colors">
+                            <i class="fa-solid fa-rocket text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm">Growth ETF</div>
+                            <div class="text-xs text-gray-400 font-eng">Global Tech • High Risk</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold font-eng text-sm" id="growth-value">฿ 5,450.00</div>
+                        <div class="text-xs text-[#10b981] font-eng font-semibold live-num" id="growth-change">+620.00</div>
+                    </div>
+                </button>
+
+                <!-- Dividend Fund -->
+                <button class="glass-card p-4 rounded-2xl flex items-center justify-between btn-press cursor-pointer group border-l-4 border-l-[#F5B947] hover:bg-white/[0.08]"
+                    onclick="openAssetDetail('dividend')">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#F5B947]/30 to-[#F5B947]/10 flex items-center justify-center text-[#F5B947] group-hover:from-[#F5B947]/40 transition-colors">
+                            <i class="fa-solid fa-coins text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm">Dividend Fund</div>
+                            <div class="text-xs text-gray-400 font-eng">Income • Medium Risk</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold font-eng text-sm" id="dividend-value">฿ 4,500.00</div>
+                        <div class="text-xs text-[#10b981] font-eng font-semibold" id="dividend-change">+208.00</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- QUEST -->
+        <div id="page-quest" class="page-section" aria-label="Quest Center">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold">Quest Center</h2>
+                    <div class="text-[11px] text-gray-400 mt-1">
+                        เรียนการเงินผ่านภารกิจสั้น ๆ ได้แต้มแลกของจริง
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-gray-400 uppercase">Your Points</div>
+                    <div class="text-xl font-bold text-[#F5B947] font-eng">
+                        <span id="quest-points">1,250</span> <span class="text-xs">pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Mission -->
+            <div class="glass-card p-5 rounded-2xl mb-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2 opacity-10">
+                    <i class="fa-solid fa-fire text-6xl text-[#F5B947]"></i>
+                </div>
+                <div class="text-xs font-bold text-[#F5B947] mb-1">DAILY MISSION</div>
+                <h3 class="font-bold text-lg mb-2" id="daily-quest-title">อ่าน "เงินเฟ้อคืออะไร?"</h3>
+                <div class="w-full bg-gray-700 h-1.5 rounded-full mb-3">
+                    <div class="quest-progress bg-[#F5B947] h-1.5 rounded-full" id="daily-quest-progress" style="width: 66%"></div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-400" id="daily-quest-status">ความคืบหน้า: 2 / 3 นาที</span>
+                    <button class="bg-[#F5B947] text-black text-xs font-bold px-3 py-1.5 rounded-lg btn-press"
+                        onclick="completeDailyQuest()">
+                        Continue
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quest Types -->
+            <h3 class="text-sm font-semibold mb-3 mt-6">ภารกิจวันนี้</h3>
+            <div class="space-y-3" id="quest-list">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Rewards -->
+            <h3 class="font-bold text-sm mb-3 mt-6">Rewards</h3>
+            <div class="grid grid-cols-2 gap-3 mb-4" id="rewards-grid">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Mentor rank -->
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#F5B947] to-[#F97316] flex items-center justify-center">
+                    <i class="fa-solid fa-chess-king text-black"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-xs text-gray-400">Current Rank</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <div>
+                            <div class="text-sm font-semibold">Silver → Gold (Mentor Track)</div>
+                            <div class="text-[10px] text-gray-400">ผ่าน Quiz + ผลพอร์ต > มาตรฐาน</div>
+                        </div>
+                        <div class="text-right text-xs font-eng">
+                            <div class="font-bold text-[#F5B947]" id="mentor-progress">72%</div>
+                            <div class="text-[10px] text-gray-400">to Mentor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PORT -->
+        <div id="page-port" class="page-section" aria-label="Portfolio Breakdown">
+            <div class="flex justify-between items-end mb-5">
+                <div>
+                    <h2 class="text-2xl font-bold">Nuvestra Safe & Growth</h2>
+                    <div class="text-[11px] text-gray-400 mt-1">
+                        ฐานปลอดภัยจากค่าเทอม + ส่วนที่ให้นักศึกษาลงทุนเองตามเลนความเสี่ยง
+                    </div>
+                </div>
+                <div class="text-right text-xs font-eng text-gray-400">
+                    Year 2 • Term 2
+                </div>
+            </div>
+
+            <!-- Safe Card -->
+            <div class="glass-card rounded-2xl p-4 mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-xl bg-[#1EC6C9]/15 flex items-center justify-center text-[#1EC6C9]">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </span>
+                        <div>
+                            <div class="text-xs font-bold text-[#1EC6C9]">Nuvestra Safe</div>
+                            <div class="text-[11px] text-gray-400">
+                                พอร์ตตั้งต้นจากค่าเทอม (Low Risk)
+                            </div>
+                        </div>
+                    </div>
+                    <span class="risk-pill bg-emerald-500/15 text-emerald-400 border border-emerald-500/40">
+                        Low Risk
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mt-3 mb-3">
+                    <div>
+                        <div class="stat-label">จากค่าเทอมเทอมนี้</div>
+                        <div class="stat-value font-eng">฿ 4,200</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">% กันมาเป็น Safe</div>
+                        <div class="stat-value font-eng">10%</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">คาดการณ์ตอนจบปี 4</div>
+                        <div class="stat-value font-eng">฿ 27,800</div>
+                    </div>
+                </div>
+
+                <div class="text-[11px] text-gray-400 mb-2">
+                    เงิน Safe จะลงทุนในตราสารหนี้รัฐบาล / เอกชนเกรดดี / กองทุนตลาดเงิน
+                    พร้อมโชว์ให้เห็นเสมอว่า "ถืออะไรอยู่" และ "เพราะอะไร"
+                </div>
+
+                <div class="mt-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-gray-300 font-semibold">Asset Allocation</span>
+                        <span class="text-[10px] text-gray-400 font-eng">Current Holdings</span>
+                    </div>
+                    <div class="h-40">
+                        <canvas id="safeAllocationChart" aria-label="Safe Asset Allocation"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Growth Plans: Risk lanes -->
+            <h3 class="text-sm font-semibold mb-1 mt-5">
+                Nuvestra Growth – เลือกเลนความเสี่ยงก่อนค่อยลงทุนเอง
+            </h3>
+            <p class="text-[11px] text-gray-400 mb-3">
+                Chill / Balance / Bold ไม่ใช่แค่ชื่อแพ็กเกจ แต่เป็น "เลนความเสี่ยง" ที่ล็อกกรองว่านักศึกษาจะเห็น
+                และซื้อได้เฉพาะสินทรัพย์แบบไหนในหน้าเลือกลงทุน
+            </p>
+
+            <div class="grid grid-cols-3 gap-3 mb-4 text-[11px]">
+                <button id="plan-chill" class="glass-card rounded-xl p-3 text-left space-y-1 border border-transparent btn-press"
+                    onclick="selectGrowthPlan('chill')">
+                    <div class="font-bold">Chill</div>
+                    <div class="text-[10px] text-gray-400">
+                        เห็นเฉพาะสินทรัพย์เสี่ยงต่ำ
+                    </div>
+                    <div class="chip mt-1">
+                        <span class="chip-dot bg-emerald-400"></span> Low Only
+                    </div>
+                </button>
+                <button id="plan-balance" class="glass-card rounded-xl p-3 text-left space-y-1 border border-transparent btn-press"
+                    onclick="selectGrowthPlan('balance')">
+                    <div class="font-bold">Balance</div>
+                    <div class="text-[10px] text-gray-400">
+                        เห็นสินทรัพย์เสี่ยงต่ำ + กลาง
+                    </div>
+                    <div class="chip mt-1">
+                        <span class="chip-dot bg-amber-400"></span> Low + Medium
+                    </div>
+                </button>
+                <button id="plan-bold" class="glass-card rounded-xl p-3 text-left space-y-1 border border-transparent btn-press"
+                    onclick="selectGrowthPlan('bold')">
+                    <div class="font-bold">Bold</div>
+                    <div class="text-[10px] text-gray-400">
+                        เห็นครบ สูง–กลาง–ต่ำ
+                    </div>
+                    <div class="chip mt-1">
+                        <span class="chip-dot bg-rose-400"></span> High + Med + Low
+                    </div>
+                </button>
+            </div>
+
+            <div id="growth-plan-detail" class="glass-card rounded-2xl p-4 text-[11px] leading-relaxed">
+                <!-- filled by JS -->
+            </div>
+
+            <!-- Available Assets Based on Risk Lane -->
+            <div class="mt-6">
+                <h3 class="text-sm font-semibold mb-3">
+                    <span id="available-assets-title">Available Assets in Balance Plan</span>
+                    <span class="text-[10px] text-gray-400 ml-2">(Tap to invest)</span>
+                </h3>
+                <div id="available-assets-grid" class="space-y-3">
+                    <!-- Filled by JS based on selected plan -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TRANSACTIONS -->
+        <div id="page-transactions" class="page-section" aria-label="Transaction History">
+            <div class="flex justify-between items-end mb-5">
+                <div>
+                    <h2 class="text-2xl font-bold">Transaction History</h2>
+                    <div class="text-[11px] text-gray-400 mt-1">
+                        ประวัติการทำรายการทั้งหมด
+                    </div>
+                </div>
+                <button class="text-xs text-[#1EC6C9] font-eng btn-press flex items-center gap-1"
+                    onclick="exportTransactions()">
+                    <i class="fa-solid fa-download"></i> Export
+                </button>
+            </div>
+
+            <!-- Filter -->
+            <div class="flex gap-2 mb-4 overflow-x-auto hide-scroll">
+                <button class="transaction-filter px-3 py-1.5 rounded-full glass-card text-xs whitespace-nowrap border border-[#1EC6C9]" data-filter="all" onclick="filterTransactions('all', this)">
+                    All
+                </button>
+                <button class="transaction-filter px-3 py-1.5 rounded-full glass-card text-xs whitespace-nowrap border border-transparent" data-filter="buy" onclick="filterTransactions('buy', this)">
+                    Buy
+                </button>
+                <button class="transaction-filter px-3 py-1.5 rounded-full glass-card text-xs whitespace-nowrap border border-transparent" data-filter="sell" onclick="filterTransactions('sell', this)">
+                    Sell
+                </button>
+                <button class="transaction-filter px-3 py-1.5 rounded-full glass-card text-xs whitespace-nowrap border border-transparent" data-filter="deposit" onclick="filterTransactions('deposit', this)">
+                    Deposit
+                </button>
+                <button class="transaction-filter px-3 py-1.5 rounded-full glass-card text-xs whitespace-nowrap border border-transparent" data-filter="withdraw" onclick="filterTransactions('withdraw', this)">
+                    Withdraw
+                </button>
+            </div>
+
+            <!-- Transaction List -->
+            <div id="transaction-list" class="space-y-2">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- PROFILE / INVESTOR VIEW -->
+        <div id="page-profile" class="page-section" aria-label="Investor View">
+            <div class="flex justify-between items-end mb-5">
+                <div>
+                    <h2 class="text-2xl font-bold">Investor Snapshot</h2>
+                    <div class="text-[11px] text-gray-400 mt-1">
+                        โมเดลธุรกิจ • Impact • Roadmap
+                    </div>
+                </div>
+                <span class="text-[10px] text-gray-400 font-eng">Nuvestra v1.0</span>
+            </div>
+
+            <!-- Key metrics -->
+            <div class="glass-card rounded-2xl p-4 mb-4">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <div class="stat-label">Students reachable</div>
+                        <div class="stat-value font-eng">35,000+</div>
+                        <div class="text-[10px] text-gray-400 mt-1">
+                            เริ่มจาก 1 มหาวิทยาลัย → ขยาย 3–5 แห่ง
+                        </div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Target portfolio at grad</div>
+                        <div class="stat-value font-eng">฿ 25–40k</div>
+                        <div class="text-[10px] text-gray-400 mt-1">
+                            พอร์ตตั้งต้นจากค่าเทอม + การออมเพิ่ม
+                        </div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Engagement via Quest</div>
+                        <div class="stat-value font-eng">60%+</div>
+                        <div class="text-[10px] text-gray-400 mt-1">
+                            นักศึกษาที่ทำภารกิจอย่างน้อย 1 ครั้ง/เดือน
+                        </div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Mentor ratio (5Y goal)</div>
+                        <div class="stat-value font-eng">1 : 80</div>
+                        <div class="text-[10px] text-gray-400 mt-1">
+                            มี Student Financial Mentor ประจำทุก campus
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business model -->
+            <div class="glass-card rounded-2xl p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                            <i class="fa-solid fa-diagram-project text-xs text-[#1EC6C9]"></i>
+                        </span>
+                        <h3 class="text-sm font-semibold">Business Model – Win • Win • Win</h3>
+                    </div>
+                    <span class="text-[10px] text-gray-400 font-eng">Aligned incentives</span>
+                </div>
+                <ul class="text-[11px] text-gray-200 space-y-1.5">
+                    <li><span class="font-semibold text-[#1EC6C9]">นักศึกษา:</span> ได้พอร์ตตั้งต้น + ความรู้ + rewards จริงในชีวิตประจำวัน</li>
+                    <li><span class="font-semibold text-[#F5B947]">มหาวิทยาลัย:</span> เสริมภาพลักษณ์ด้านทักษะการเงิน • ข้อมูลผลลัพธ์ของศิษย์ • Co-brand ได้</li>
+                    <li><span class="font-semibold text-sky-400">Nuvestra:</span> 
+                        รายได้จาก AUM-based Fee (Safe & Growth),
+                        Platform Fee (มหาวิทยาลัยจ่ายรายหัว),
+                        และ Partner ที่เข้าร่วมระบบ Quest
+                    </li>
+                    <li class="mt-2 text-gray-400">
+                        รายได้โตไปพร้อม "การมีส่วนร่วมของนักศึกษา + การเติบโตของ AUM"
+                        ไม่เน้นการเทรดสั้นหรือเก็งกำไรระยะสั้น
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Roadmap -->
+            <div class="glass-card rounded-2xl p-4 mb-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-route text-xs text-[#F97316]"></i>
+                    </span>
+                    <h3 class="text-sm font-semibold">Roadmap (3 Phases)</h3>
+                </div>
+                <ol class="text-[11px] text-gray-200 space-y-2">
+                    <li>
+                        <span class="font-semibold text-gray-100">Phase 1 – Pilot</span>
+                        เริ่มจาก 1 มหาวิทยาลัย เปิดใช้ Nuvestra Safe + Quest
+                        เก็บ feedback และวัดผลด้าน mindset / behaviour
+                    </li>
+                    <li>
+                        <span class="font-semibold text-gray-100">Phase 2 – Scale</span>
+                        ขยายไปยัง 3–5 มหาวิทยาลัย เปิด Nuvestra Growth
+                        + ระบบ Mentor เต็มรูปแบบ
+                    </li>
+                    <li>
+                        <span class="font-semibold text-gray-100">Phase 3 – Ecosystem</span>
+                        เชื่อมทุนการศึกษา, โปรแกรม exchange และ corporate partner
+                        เพื่อสร้าง student financial ecosystem ระดับประเทศ
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Impact summary -->
+            <div class="glass-card rounded-2xl p-4 mb-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                        <i class="fa-solid fa-bullseye text-xs text-emerald-400"></i>
+                    </span>
+                    <h3 class="text-sm font-semibold">Impact we aim for (5 ปี)</h3>
+                </div>
+                <ul class="text-[11px] text-gray-200 space-y-1.5">
+                    <li>นักศึกษามากกว่า <span class="font-semibold">80%</span> ผ่านเกณฑ์พื้นฐานด้านการเงิน</li>
+                    <li>นักศึกษาที่จบปี 4 ส่วนใหญ่มี "พอร์ตแรก" ที่จับต้องได้ ไม่ใช่ 0</li>
+                    <li>เกิด community ของ Student Financial Mentors ในทุก campus</li>
+                    <li>ทำให้ "การจบมหาวิทยาลัย" = จบพร้อมใบปริญญา + พอร์ตตั้งต้น + mindset ทางการเงินที่ดี</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="absolute bottom-0 w-full px-4 pb-8 pt-4 z-40 pointer-events-none">
+        <div class="glass-card rounded-3xl h-20 flex justify-around items-center pointer-events-auto relative overflow-hidden border shadow-xl">
+            <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
+            <button class="nav-btn flex flex-col items-center justify-center gap-1.5 flex-1 text-[#1EC6C9] btn-press group transition-all"
+                onclick="switchTab('dashboard', this)" aria-label="Home">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                    <i class="fa-solid fa-house text-lg"></i>
+                </div>
+                <span class="text-[9px] font-semibold font-eng">Home</span>
+            </button>
+            
+            <button class="nav-btn flex flex-col items-center justify-center gap-1.5 flex-1 text-gray-500 hover:text-gray-300 btn-press group transition-all"
+                onclick="switchTab('quest', this)" aria-label="Quest">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                    <i class="fa-solid fa-star text-lg"></i>
+                </div>
+                <span class="text-[9px] font-semibold font-eng">Quest</span>
+            </button>
+            
+            <button class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#1EC6C9] via-[#2dd4d4] to-[#5bfdfd] text-[#02040a] flex items-center justify-center -mt-14 shadow-2xl shadow-[#1EC6C9]/30 border-4 border-[#02040a] btn-press hover:scale-105 transition-transform group"
+                onclick="toggleActionMenu()" aria-label="Quick actions">
+                <i class="fa-solid fa-plus text-2xl font-bold group-hover:rotate-90 transition-transform duration-300"></i>
+            </button>
+
+            <button class="nav-btn flex flex-col items-center justify-center gap-1.5 flex-1 text-gray-500 hover:text-gray-300 btn-press group transition-all"
+                onclick="switchTab('port', this)" aria-label="Portfolio">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                    <i class="fa-solid fa-pie-chart text-lg"></i>
+                </div>
+                <span class="text-[9px] font-semibold font-eng">Portfolio</span>
+            </button>
+            
+            <button class="nav-btn flex flex-col items-center justify-center gap-1.5 flex-1 text-gray-500 hover:text-gray-300 btn-press group transition-all"
+                onclick="switchTab('profile', this)" aria-label="Profile">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                    <i class="fa-solid fa-user text-lg"></i>
+                </div>
+                <span class="text-[9px] font-semibold font-eng">Profile</span>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Action Sheet -->
+    <div id="action-sheet" class="bottom-sheet p-6 pb-10">
+        <div class="w-12 h-1 bg-gray-700 rounded-full mx-auto mb-6"></div>
+        <h3 class="text-lg font-bold mb-6">Quick Actions</h3>
+        <div class="grid grid-cols-4 gap-3 mb-8 text-center">
+            <button class="flex flex-col items-center gap-3 btn-press group"
+                onclick="openDeposit()">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1EC6C9]/20 to-[#1EC6C9]/5 flex items-center justify-center text-[#1EC6C9] border border-[#1EC6C9]/20 group-hover:from-[#1EC6C9]/30 transition-all">
+                    <i class="fa-solid fa-arrow-down text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold">Deposit</span>
+            </button>
+            <button class="flex flex-col items-center gap-3 btn-press group"
+                onclick="openWithdraw()">
+                <div class="w-14 h-14 rounded-2xl bg-white/[0.08] flex items-center justify-center text-white border border-white/10 group-hover:bg-white/[0.12] transition-all">
+                    <i class="fa-solid fa-arrow-up text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold">Withdraw</span>
+            </button>
+            <button class="flex flex-col items-center gap-3 btn-press group"
+                onclick="openSwap()">
+                <div class="w-14 h-14 rounded-2xl bg-white/[0.08] flex items-center justify-center text-white border border-white/10 group-hover:bg-white/[0.12] transition-all">
+                    <i class="fa-solid fa-repeat text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold">Swap</span>
+            </button>
+            <button class="flex flex-col items-center gap-3 btn-press group"
+                onclick="showToast('Scan feature coming soon')">
+                <div class="w-14 h-14 rounded-2xl bg-white/[0.08] flex items-center justify-center text-white border border-white/10 group-hover:bg-white/[0.12] transition-all">
+                    <i class="fa-solid fa-qrcode text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold">Scan</span>
+            </button>
+        </div>
+        <button class="w-full py-3 rounded-xl glass-card text-gray-300 font-bold btn-press hover:bg-white/[0.08]"
+            onclick="closeAllModals()">
+            Cancel
+        </button>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="deposit-modal" class="bottom-sheet p-6 pb-10">
+        <div class="w-12 h-1 bg-gray-700 rounded-full mx-auto mb-6"></div>
+        <h3 class="text-lg font-bold mb-6">Deposit Funds</h3>
+        
+        <div class="space-y-4 mb-8">
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">Amount (฿)</label>
+                <input type="number" id="deposit-amount" placeholder="0.00" min="0" step="100" class="text-lg">
+            </div>
+            
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">Allocate to</label>
+                <select id="deposit-target" class="text-base">
+                    <option value="safe">Safe Fund (Low Risk)</option>
+                    <option value="growth">Growth ETF (High Risk)</option>
+                    <option value="dividend">Dividend Fund (Medium Risk)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button class="flex-1 py-3 glass-card rounded-lg font-bold btn-press hover:bg-white/[0.08]"
+                onclick="closeAllModals()">
+                Cancel
+            </button>
+            <button class="flex-[2] py-3 bg-gradient-to-r from-[#1EC6C9] to-[#00d26a] text-black rounded-lg font-bold btn-press hover:shadow-lg hover:shadow-[#1EC6C9]/20 transition-all"
+                onclick="executeDeposit()">
+                Confirm Deposit
+            </button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdraw-modal" class="bottom-sheet p-6 pb-10">
+        <div class="w-12 h-1 bg-gray-700 rounded-full mx-auto mb-6"></div>
+        <h3 class="text-lg font-bold mb-6">Withdraw Funds</h3>
+        
+        <div class="space-y-4 mb-8">
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">Amount (฿)</label>
+                <input type="number" id="withdraw-amount" placeholder="0.00" min="0" step="100" class="text-lg">
+            </div>
+            
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">From</label>
+                <select id="withdraw-source" class="text-base">
+                    <option value="safe">Safe Fund</option>
+                    <option value="growth">Growth ETF</option>
+                    <option value="dividend">Dividend Fund</option>
+                </select>
+            </div>
+
+            <div class="glass-card p-3 rounded-xl text-[11px] text-gray-300 border border-white/10 bg-white/[0.03]">
+                <div class="flex items-start gap-2">
+                    <i class="fa-solid fa-info-circle text-[#1EC6C9] flex-shrink-0 mt-0.5"></i>
+                    <span>Funds will be transferred to your linked bank account within 1-2 business days</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button class="flex-1 py-3 glass-card rounded-lg font-bold btn-press hover:bg-white/[0.08]"
+                onclick="closeAllModals()">
+                Cancel
+            </button>
+            <button class="flex-[2] py-3 bg-gradient-to-r from-[#1EC6C9] to-[#00d26a] text-black rounded-lg font-bold btn-press hover:shadow-lg hover:shadow-[#1EC6C9]/20 transition-all"
+                onclick="executeWithdraw()">
+                Confirm Withdraw
+            </button>
+        </div>
+    </div>
+
+    <!-- Swap Modal -->
+    <div id="swap-modal" class="bottom-sheet p-6 pb-10">
+        <div class="w-12 h-1 bg-gray-700 rounded-full mx-auto mb-6"></div>
+        <h3 class="text-lg font-bold mb-6">Swap Assets</h3>
+        
+        <div class="space-y-4 mb-8">
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">From</label>
+                <select id="swap-from" class="text-base">
+                    <option value="safe">Safe Fund</option>
+                    <option value="growth">Growth ETF</option>
+                    <option value="dividend">Dividend Fund</option>
+                </select>
+            </div>
+
+            <div class="flex justify-center">
+                <div class="w-10 h-10 rounded-full glass-card flex items-center justify-center group hover:bg-white/[0.15] transition-colors">
+                    <i class="fa-solid fa-arrow-down-up text-[#1EC6C9] group-hover:rotate-180 transition-transform duration-300"></i>
+                </div>
+            </div>
+            
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">To</label>
+                <select id="swap-to" class="text-base">
+                    <option value="growth">Growth ETF</option>
+                    <option value="dividend">Dividend Fund</option>
+                    <option value="safe">Safe Fund</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs text-gray-400 mb-2.5 block font-semibold tracking-wide">Amount (฿)</label>
+                <input type="number" id="swap-amount" placeholder="0.00" min="0" step="100" class="text-lg">
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button class="flex-1 py-3 glass-card rounded-lg font-bold btn-press hover:bg-white/[0.08]"
+                onclick="closeAllModals()">
+                Cancel
+            </button>
+            <button class="flex-[2] py-3 bg-gradient-to-r from-[#1EC6C9] to-[#00d26a] text-black rounded-lg font-bold btn-press hover:shadow-lg hover:shadow-[#1EC6C9]/20 transition-all"
+                onclick="executeSwap()">
+                Confirm Swap
+            </button>
+        </div>
+    </div>
+
+    <!-- Asset Modal -->
+    <div id="asset-modal" class="bottom-sheet p-0 h-[85%]">
+        <div id="modal-header-bg" class="h-40 bg-gradient-to-br from-[#5C6CFF] to-[#1a237e] relative p-6 flex flex-col justify-end rounded-t-3xl">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center text-white btn-press backdrop-blur transition-colors" aria-label="Close">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="modal-tag" class="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold mb-2 w-max text-white">
+                HIGH RISK
+            </div>
+            <h2 id="modal-title" class="text-3xl font-bold text-white drop-shadow-lg">Tech Growth ETF</h2>
+            <div class="text-xs text-white/80" id="modal-subtitle">Global Equities • Technology</div>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-b from-[#0f131f] to-[#0a0f1a] h-full overflow-y-auto hide-scroll">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <div class="stat-label">Current Value</div>
+                    <div id="modal-price" class="text-4xl font-bold font-eng mt-2">฿ 5,450.00</div>
+                </div>
+                <div class="text-right">
+                    <div id="modal-change" class="text-sm font-bold text-[#10b981] badge-success px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-trend-up"></i> 12.4%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sparkline -->
+            <div id="asset-sparkline" class="w-full h-32 mb-8 border-b border-white/10 flex items-end gap-1 pb-3 opacity-80"></div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="p-4 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] transition-colors">
+                    <div class="stat-label">Avg Cost</div>
+                    <div class="font-bold font-eng text-lg mt-1" id="modal-avg-cost">฿ 102.40</div>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5">
+                    <div class="text-xs text-gray-500">Unrealized P/L</div>
+                    <div class="font-bold font-eng text-[#10b981]" id="modal-pl">+ ฿ 620.00</div>
+                </div>
+                <div class="p-4 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] transition-colors">
+                    <div class="stat-label">Units Held</div>
+                    <div class="font-bold font-eng text-lg mt-1" id="modal-units">53.25</div>
+                </div>
+                <div class="p-4 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] transition-colors">
+                    <div class="stat-label">Current Price</div>
+                    <div class="font-bold font-eng text-lg mt-1" id="modal-current-price">฿ 114.80</div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-8 mb-8">
+                <button class="flex-1 py-4 glass-card text-white font-bold rounded-xl btn-press hover:bg-white/[0.1] transition-colors border border-white/10"
+                    onclick="sellAsset()">
+                    <i class="fa-solid fa-arrow-up-right mr-2"></i>Sell
+                </button>
+                <button class="flex-[2] py-4 bg-gradient-to-r from-[#1EC6C9] to-[#00d26a] text-black font-bold rounded-xl shadow-lg shadow-[#1EC6C9]/20 btn-press hover:shadow-xl hover:shadow-[#1EC6C9]/30 transition-all"
+                    onclick="buyAsset()">
+                    <i class="fa-solid fa-plus mr-2"></i>Buy More
+                </button>
+            </div>
+
+            <div class="glass-card p-4 rounded-lg text-xs text-gray-300 border border-white/10 bg-white/[0.03]" id="modal-description">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div id="notifications-modal" class="bottom-sheet p-6 pb-10 h-[70%]">
+        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6"></div>
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">Notifications</h3>
+            <button class="text-xs text-[#1EC6C9] font-semibold btn-press hover:text-[#5bfdfd] transition-colors font-eng" onclick="markAllRead()">
+                Mark all read
+            </button>
+        </div>
+        
+        <div id="notifications-list" class="space-y-3">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+
+    <!-- Investment Modal -->
+    <div id="invest-modal" class="bottom-sheet p-0 h-[85%]">
+        <div id="invest-header-bg" class="h-40 bg-gradient-to-br from-[#22C55E] to-[#15803d] relative p-6 flex flex-col justify-end rounded-t-3xl">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center text-white btn-press backdrop-blur transition-colors" aria-label="Close">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h2 id="invest-asset-name" class="text-3xl font-bold text-white drop-shadow-lg">Asset Name</h2>
+            <div class="text-xs text-white/80" id="invest-asset-subtitle">Asset Subtitle</div>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-b from-[#0f131f] to-[#0a0f1a] h-full overflow-y-auto hide-scroll">
+            <div class="mb-8">
+                <label class="text-xs text-gray-400 mb-3 block font-semibold tracking-wide uppercase">Investment Amount (฿)</label>
+                <input type="number" id="invest-amount" placeholder="0.00" min="100" step="100" class="text-xl font-bold">
+                <div class="text-xs text-gray-500 mt-3 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/10">
+                    <i class="fa-solid fa-info-circle text-[#1EC6C9] mr-2"></i>
+                    Minimum: ฿<span id="invest-min-amount" class="font-semibold">100</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-xl mb-8 border border-white/10">
+                <h4 class="text-xs font-bold text-[#1EC6C9] mb-4 uppercase tracking-wide">Quick Amounts</h4>
+                <div class="grid grid-cols-4 gap-2">
+                    <button class="py-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-xs font-eng font-semibold btn-press transition-all border border-white/10 hover:border-white/20" onclick="setInvestAmount(500)">
+                        ฿500
+                    </button>
+                    <button class="py-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-xs font-eng font-semibold btn-press transition-all border border-white/10 hover:border-white/20" onclick="setInvestAmount(1000)">
+                        ฿1K
+                    </button>
+                    <button class="py-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-xs font-eng font-semibold btn-press transition-all border border-white/10 hover:border-white/20" onclick="setInvestAmount(2000)">
+                        ฿2K
+                    </button>
+                    <button class="py-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-xs font-eng font-semibold btn-press transition-all border border-white/10 hover:border-white/20" onclick="setInvestAmount(5000)">
+                        ฿5K
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-lg mb-8 text-xs text-gray-300 border border-white/10 bg-white/[0.03]">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-shield-halved text-[#1EC6C9] flex-shrink-0 mt-0.5 text-sm"></i>
+                    <div>
+                        <div class="font-semibold text-white mb-1">Risk Lane Protection</div>
+                        <div class="text-gray-400 leading-relaxed">
+                            This investment aligns with your <span class="text-[#1EC6C9] font-semibold" id="current-plan-display">Balance</span> plan. You can only access assets that match your selected risk level.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button class="flex-1 py-4 glass-card text-white font-bold rounded-lg btn-press hover:bg-white/[0.1] transition-colors border border-white/10"
+                    onclick="closeAllModals()">
+                    Cancel
+                </button>
+                <button class="flex-[2] py-4 bg-gradient-to-r from-[#22C55E] to-[#10b981] text-black font-bold rounded-lg shadow-lg shadow-[#22C55E]/25 btn-press hover:shadow-xl hover:shadow-[#22C55E]/35 transition-all"
+                    onclick="executeInvestment()">
+                    <i class="fa-solid fa-check-circle mr-2"></i>Confirm Investment
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div></div>
+
+<script>
+// ========== DATA STORAGE ==========
+const AppData = {
+    portfolio: {
+        safe: { value: 2500, avgCost: 98.5, units: 25.38, change: 12.50 },
+        growth: { value: 5450, avgCost: 102.4, units: 53.25, change: 620 },
+        dividend: { value: 4500, avgCost: 88.2, units: 51.02, change: 208 }
+    },
+    transactions: [],
+    quests: [],
+    rewards: [],
+    notifications: [],
+    user: {
+        name: 'Nui Student',
+        level: 5,
+        points: 1250,
+        currentPlan: 'balance'
+    }
+};
+
+// Utility: escape HTML to avoid XSS when inserting untrusted text
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// ========== INIT DATA ==========
+function initializeData() {
+    // Sample transactions
+    AppData.transactions = [
+        { id: 1, type: 'deposit', asset: 'safe', amount: 1000, date: new Date(2024, 10, 15), status: 'completed' },
+        { id: 2, type: 'buy', asset: 'growth', amount: 2000, date: new Date(2024, 10, 18), status: 'completed' },
+        { id: 3, type: 'buy', asset: 'dividend', amount: 1500, date: new Date(2024, 10, 20), status: 'completed' },
+        { id: 4, type: 'deposit', asset: 'growth', amount: 1500, date: new Date(2024, 10, 22), status: 'completed' },
+        { id: 5, type: 'sell', asset: 'safe', amount: 500, date: new Date(2024, 11, 1), status: 'completed' },
+        { id: 6, type: 'buy', asset: 'dividend', amount: 800, date: new Date(2024, 11, 5), status: 'completed' }
+    ];
+
+    // Quests
+    AppData.quests = [
+        { id: 1, type: 'learn', title: 'ดูวิดีโอ: "พื้นฐานหุ้นใน 5 นาที"', subtitle: 'จบแล้วทำ Quiz 5 ข้อ', points: 50, completed: false },
+        { id: 2, type: 'habit', title: 'ตั้งเป้าออม ฿ 3,000 ใน 3 เดือน', subtitle: 'Track ผ่านแอปทุกสัปดาห์', points: 100, completed: false },
+        { id: 3, type: 'challenge', title: 'Portfolio Rebalance Challenge', subtitle: 'Review and adjust your allocation', points: 75, completed: false }
+    ];
+
+    // Rewards
+    AppData.rewards = [
+        { id: 1, name: 'ร้านกาแฟในมอ', points: 500, icon: 'coffee', available: false },
+        { id: 2, name: 'ลด 10% ร้านหนังสือ', points: 1000, icon: 'book', available: true },
+        { id: 3, name: 'Free Udemy Course', points: 1500, icon: 'graduation-cap', available: true },
+        { id: 4, name: 'Premium Feature 1 เดือน', points: 2000, icon: 'crown', available: true }
+    ];
+
+    // Notifications
+    AppData.notifications = [
+        { id: 1, title: 'Quest Completed!', message: 'You earned 50 points from "อ่านบทความเงินเฟ้อ"', time: '2 hours ago', read: false, type: 'success' },
+        { id: 2, title: 'Market Update', message: 'Tech Growth ETF is up 2.4% today', time: '4 hours ago', read: false, type: 'info' },
+        { id: 3, title: 'Deposit Confirmed', message: '฿1,500 added to Growth ETF', time: '1 day ago', read: true, type: 'success' },
+        { id: 4, title: 'New Quest Available', message: 'Complete "Portfolio Rebalance Challenge" for 75 pts', time: '2 days ago', read: true, type: 'quest' }
+    ];
+}
+
+// ========== TOAST ==========
+function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    const msgEl = document.getElementById('toast-msg');
+    if (!toast || !msgEl) return;
+    
+    msgEl.innerText = msg;
+    toast.style.background = type === 'success' ? 'rgba(0, 210, 106, 0.9)' : 'rgba(239, 68, 68, 0.9)';
+    toast.classList.add('active');
+    setTimeout(() => toast.classList.remove('active'), 2500);
+}
+
+// ========== BOTTOM SHEETS ==========
+function toggleActionMenu() {
+    const sheet = document.getElementById('action-sheet');
+    const overlay = document.getElementById('main-overlay');
+    if (sheet && overlay) {
+        sheet.classList.add('active');
+        overlay.classList.add('active');
+    }
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.bottom-sheet').forEach(el => el.classList.remove('active'));
+    const overlay = document.getElementById('main-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+function openDeposit() {
+    closeAllModals();
+    setTimeout(() => {
+        document.getElementById('deposit-modal').classList.add('active');
+        document.getElementById('main-overlay').classList.add('active');
+    }, 100);
+}
+
+function openWithdraw() {
+    closeAllModals();
+    setTimeout(() => {
+        document.getElementById('withdraw-modal').classList.add('active');
+        document.getElementById('main-overlay').classList.add('active');
+    }, 100);
+}
+
+function openSwap() {
+    closeAllModals();
+    setTimeout(() => {
+        document.getElementById('swap-modal').classList.add('active');
+        document.getElementById('main-overlay').classList.add('active');
+    }, 100);
+}
+
+function openNotifications() {
+    renderNotifications();
+    document.getElementById('notifications-modal').classList.add('active');
+    document.getElementById('main-overlay').classList.add('active');
+    
+    // Mark as read after opening
+    setTimeout(() => {
+        AppData.notifications.forEach(n => n.read = true);
+        updateNotificationBadge();
+    }, 1000);
+}
+
+function openProfileSettings() {
+    showToast('Profile settings coming soon');
+}
+
+// ========== TRANSACTIONS ==========
+function executeDeposit() {
+    const amount = parseFloat(document.getElementById('deposit-amount').value);
+    const target = document.getElementById('deposit-target').value;
+    
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+    
+    // Add to portfolio
+    AppData.portfolio[target].value += amount;
+    AppData.portfolio[target].units += amount / AppData.portfolio[target].avgCost;
+    
+    // Add transaction
+    AppData.transactions.unshift({
+        id: AppData.transactions.length + 1,
+        type: 'deposit',
+        asset: target,
+        amount: amount,
+        date: new Date(),
+        status: 'completed'
+    });
+    
+    closeAllModals();
+    updatePortfolio();
+    showToast(`฿${amount.toLocaleString()} deposited successfully!`);
+    document.getElementById('deposit-amount').value = '';
+}
+
+function executeWithdraw() {
+    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+    const source = document.getElementById('withdraw-source').value;
+    
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+    
+    if (AppData.portfolio[source].value < amount) {
+        showToast('Insufficient balance', 'error');
+        return;
+    }
+    
+    // Deduct from portfolio
+    AppData.portfolio[source].value -= amount;
+    AppData.portfolio[source].units -= amount / AppData.portfolio[source].avgCost;
+    
+    // Add transaction
+    AppData.transactions.unshift({
+        id: AppData.transactions.length + 1,
+        type: 'withdraw',
+        asset: source,
+        amount: amount,
+        date: new Date(),
+        status: 'completed'
+    });
+    
+    closeAllModals();
+    updatePortfolio();
+    showToast(`฿${amount.toLocaleString()} withdrawal initiated`);
+    document.getElementById('withdraw-amount').value = '';
+}
+
+function executeSwap() {
+    const amount = parseFloat(document.getElementById('swap-amount').value);
+    const from = document.getElementById('swap-from').value;
+    const to = document.getElementById('swap-to').value;
+    
+    if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+    }
+    
+    if (from === to) {
+        showToast('Cannot swap to the same asset', 'error');
+        return;
+    }
+    
+    if (AppData.portfolio[from].value < amount) {
+        showToast('Insufficient balance', 'error');
+        return;
+    }
+    
+    // Execute swap
+    AppData.portfolio[from].value -= amount;
+    AppData.portfolio[from].units -= amount / AppData.portfolio[from].avgCost;
+    AppData.portfolio[to].value += amount;
+    AppData.portfolio[to].units += amount / AppData.portfolio[to].avgCost;
+    
+    // Add transactions
+    AppData.transactions.unshift({
+        id: AppData.transactions.length + 1,
+        type: 'sell',
+        asset: from,
+        amount: amount,
+        date: new Date(),
+        status: 'completed'
+    });
+    AppData.transactions.unshift({
+        id: AppData.transactions.length + 2,
+        type: 'buy',
+        asset: to,
+        amount: amount,
+        date: new Date(),
+        status: 'completed'
+    });
+    
+    closeAllModals();
+    updatePortfolio();
+    showToast('Swap executed successfully!');
+    document.getElementById('swap-amount').value = '';
+}
+
+function renderTransactions(filter = 'all') {
+    const container = document.getElementById('transaction-list');
+    if (!container) return;
+    
+    let filtered = AppData.transactions;
+    if (filter !== 'all') {
+        filtered = AppData.transactions.filter(t => t.type === filter);
+    }
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 py-8">No transactions found</div>';
+        return;
+    }
+    
+    container.innerHTML = filtered.map(t => {
+        const assetName = t.assetName || (t.asset === 'safe' ? 'Safe Fund' : t.asset === 'growth' ? 'Growth ETF' : 'Dividend Fund');
+        const color = t.type === 'deposit' || t.type === 'buy' ? '#00d26a' : '#ef4444';
+        const icon = t.type === 'deposit' ? 'arrow-down' : t.type === 'withdraw' ? 'arrow-up' : t.type === 'buy' ? 'plus' : 'minus';
+        const sign = t.type === 'deposit' || t.type === 'buy' ? '+' : '-';
+        
+        return `
+            <div class="transaction-item glass-card p-4 rounded-xl" style="border-left-color: ${color}">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                            <i class="fa-solid fa-${icon}" style="color: ${color}"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold capitalize">${escapeHTML(t.type)}</div>
+                            <div class="text-[10px] text-gray-400">${escapeHTML(assetName)} • ${escapeHTML(formatDate(t.date))}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold font-eng" style="color: ${color}">${sign}฿${t.amount.toLocaleString()}</div>
+                        <div class="text-[10px] text-gray-400 capitalize">${escapeHTML(t.status)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderRecentTransactions() {
+    const container = document.getElementById('recent-transactions');
+    if (!container) return;
+    
+    const recent = AppData.transactions.slice(0, 3);
+    container.innerHTML = recent.map(t => {
+        const assetName = t.assetName || (t.asset === 'safe' ? 'Safe Fund' : t.asset === 'growth' ? 'Growth ETF' : 'Dividend Fund');
+        const color = t.type === 'deposit' || t.type === 'buy' ? '#00d26a' : '#ef4444';
+        const icon = t.type === 'deposit' ? 'arrow-down' : t.type === 'withdraw' ? 'arrow-up' : t.type === 'buy' ? 'plus' : 'minus';
+        const sign = t.type === 'deposit' || t.type === 'buy' ? '+' : '-';
+        
+        return `
+            <div class="glass-card p-3 rounded-xl flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-${icon}" style="color: ${color}"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold capitalize">${escapeHTML(t.type)} • ${escapeHTML(assetName)}</div>
+                        <div class="text-[9px] text-gray-400">${escapeHTML(formatDate(t.date))}</div>
+                    </div>
+                </div>
+                <div class="font-bold font-eng text-xs" style="color: ${color}">${sign}฿${t.amount.toLocaleString()}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function setInvestAmount(amount) {
+    const input = document.getElementById('invest-amount');
+    if (input) input.value = amount;
+}
+
+function filterTransactions(filter, btn) {
+    document.querySelectorAll('.transaction-filter').forEach(b => {
+        b.classList.remove('border-[#1EC6C9]');
+        b.classList.add('border-transparent');
+    });
+    btn.classList.add('border-[#1EC6C9]');
+    btn.classList.remove('border-transparent');
+    
+    renderTransactions(filter);
+}
+
+function exportTransactions() {
+    showToast('Exporting to CSV...');
+    setTimeout(() => showToast('Export complete!'), 1000);
+}
+
+function formatDate(date) {
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+}
+
+// ========== QUESTS ==========
+function renderQuests() {
+    const container = document.getElementById('quest-list');
+    if (!container) return;
+    
+    container.innerHTML = AppData.quests.map(q => {
+        const colors = {
+            learn: { bg: '#1EC6C9', label: 'LEARN' },
+            habit: { bg: '#22C55E', label: 'HABIT' },
+            challenge: { bg: '#F5B947', label: 'CHALLENGE' }
+        };
+        const color = colors[q.type];
+        
+        return `
+            <div class="glass-card p-4 rounded-2xl ${q.completed ? 'opacity-50' : ''}">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                        <div class="text-xs font-bold mb-1" style="color: ${color.bg}">${color.label}</div>
+                        <div class="text-sm font-semibold">${escapeHTML(q.title)}</div>
+                        <div class="text-[10px] text-gray-400 mt-1">${escapeHTML(q.subtitle)}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-[#F5B947]">+${q.points} pts</div>
+                    </div>
+                </div>
+                <button class="w-full mt-3 py-2 rounded-lg ${q.completed ? 'bg-white/5 text-gray-500' : 'bg-white/10 text-white'} text-xs font-eng btn-press"
+                    onclick="${q.completed ? '' : `completeQuest(${q.id})`}" ${q.completed ? 'disabled' : ''}>
+                    ${q.completed ? 'Completed ✓' : 'Start Quest'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderRewards() {
+    const container = document.getElementById('rewards-grid');
+    if (!container) return;
+    
+    container.innerHTML = AppData.rewards.map(r => {
+        const canRedeem = AppData.user.points >= r.points && r.available;
+        
+        return `
+            <button class="glass-card p-3 rounded-xl text-center btn-press ${!canRedeem ? 'opacity-60' : 'border border-[#F5B947]/50'}"
+                onclick="${canRedeem ? `redeemReward(${r.id})` : ''}" ${!canRedeem ? 'disabled' : ''}>
+                <i class="fa-solid fa-${r.icon} text-2xl mb-2 ${canRedeem ? 'text-[#F5B947]' : 'text-gray-400'}"></i>
+                <div class="text-xs font-bold ${canRedeem ? 'text-white' : 'text-gray-400'}">${escapeHTML(r.name)}</div>
+                <div class="text-[10px] ${canRedeem ? 'text-[#F5B947]' : 'text-gray-500'}">แลก ${r.points} pts</div>
+            </button>
+        `;
+    }).join('');
+}
+
+function completeQuest(id) {
+    const quest = AppData.quests.find(q => q.id === id);
+    if (!quest || quest.completed) return;
+    
+    quest.completed = true;
+    AppData.user.points += quest.points;
+    
+    // Update UI
+    document.getElementById('quest-points').textContent = AppData.user.points.toLocaleString();
+    renderQuests();
+    renderRewards();
+    
+    showToast(`Quest completed! +${quest.points} points`);
+    
+    // Add notification
+    AppData.notifications.unshift({
+        id: AppData.notifications.length + 1,
+        title: 'Quest Completed!',
+        message: `You earned ${quest.points} points from "${quest.title}"`,
+        time: 'Just now',
+        read: false,
+        type: 'success'
+    });
+    updateNotificationBadge();
+}
+
+function completeDailyQuest() {
+    AppData.user.points += 30;
+    document.getElementById('quest-points').textContent = AppData.user.points.toLocaleString();
+    document.getElementById('daily-quest-progress').style.width = '100%';
+    document.getElementById('daily-quest-status').textContent = 'Completed! ✓';
+    
+    setTimeout(() => {
+        document.getElementById('daily-quest-title').textContent = 'ดูวิดีโอ: "Compound Interest Magic"';
+        document.getElementById('daily-quest-progress').style.width = '0%';
+        document.getElementById('daily-quest-status').textContent = 'ความคืบหน้า: 0 / 5 นาที';
+    }, 2000);
+    
+    showToast('Daily quest completed! +30 points');
+}
+
+function redeemReward(id) {
+    const reward = AppData.rewards.find(r => r.id === id);
+    if (!reward || AppData.user.points < reward.points) return;
+    
+    AppData.user.points -= reward.points;
+    document.getElementById('quest-points').textContent = AppData.user.points.toLocaleString();
+    renderRewards();
+    
+    showToast(`Reward redeemed: ${reward.name}`);
+}
+
+// ========== NOTIFICATIONS ==========
+function renderNotifications() {
+    const container = document.getElementById('notifications-list');
+    if (!container) return;
+    
+    if (AppData.notifications.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 py-8">No notifications</div>';
+        return;
+    }
+    
+    container.innerHTML = AppData.notifications.map(n => {
+        const icons = {
+            success: { icon: 'circle-check', color: '#00d26a' },
+            info: { icon: 'info-circle', color: '#3b82f6' },
+            quest: { icon: 'scroll', color: '#F5B947' },
+            warning: { icon: 'exclamation-triangle', color: '#f59e0b' }
+        };
+        const style = icons[n.type] || icons.info;
+        
+        return `
+            <div class="glass-card p-4 rounded-xl ${n.read ? 'opacity-60' : ''}">
+                <div class="flex gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-${style.icon}" style="color: ${style.color}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm font-semibold mb-1">${escapeHTML(n.title)}</div>
+                        <div class="text-xs text-gray-400 mb-1">${escapeHTML(n.message)}</div>
+                        <div class="text-[10px] text-gray-500">${escapeHTML(n.time)}</div>
+                    </div>
+                    ${!n.read ? '<div class="w-2 h-2 rounded-full bg-[#1EC6C9] flex-shrink-0"></div>' : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function markAllRead() {
+    AppData.notifications.forEach(n => n.read = true);
+    renderNotifications();
+    updateNotificationBadge();
+    showToast('All notifications marked as read');
+}
+
+function updateNotificationBadge() {
+    const badge = document.getElementById('notif-badge');
+    const unread = AppData.notifications.filter(n => !n.read).length;
+    if (badge) {
+        badge.style.display = unread > 0 ? 'block' : 'none';
+    }
+}
+
+// ========== NAVIGATION ==========
+function switchTab(pageId, btn) {
+    // Highlight nav
+    if (btn) {
+        document.querySelectorAll('.nav-btn').forEach(b => {
+            b.classList.remove('text-[#1EC6C9]');
+            b.classList.add('text-gray-500');
+        });
+        btn.classList.remove('text-gray-500');
+        btn.classList.add('text-[#1EC6C9]');
+    }
+
+    // Switch page
+    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById('page-' + pageId);
+    if (page) page.classList.add('active');
+
+    // Special handling for transactions page
+    if (pageId === 'transactions') {
+        renderTransactions('all');
+    }
+
+    // Toggle Student/Investor visual
+    const modeStudent = document.getElementById('mode-student');
+    const modeInvestor = document.getElementById('mode-investor');
+    if (modeStudent && modeInvestor) {
+        if (pageId === 'profile') {
+            modeStudent.classList.remove('bg-white/10', 'font-semibold');
+            modeStudent.classList.add('text-gray-400');
+            modeInvestor.classList.add('bg-white/10', 'font-semibold');
+            modeInvestor.classList.remove('text-gray-400');
+        } else {
+            modeInvestor.classList.remove('bg-white/10', 'font-semibold');
+            modeInvestor.classList.add('text-gray-400');
+            modeStudent.classList.add('bg-white/10', 'font-semibold');
+            modeStudent.classList.remove('text-gray-400');
+        }
+    }
+}
+
+// ========== ASSET MODAL ==========
+const assetDetails = {
+    safe: {
+        title: 'Nuvestra Safe Fund',
+        subtitle: 'Government & Corporate Bonds',
+        tag: 'LOW RISK • SAFE',
+        gradient: 'from-[#1EC6C9] to-[#0f7680]',
+        description: 'ลงทุนในตราสารหนี้รัฐบาลและเอกชนเกรดดี เน้นความมั่นคง เหมาะสำหรับเงินส่วนที่ต้องการเก็บรักษาไว้ให้ปลอดภัย'
+    },
+    growth: {
+        title: 'Tech Growth ETF',
+        subtitle: 'Global Technology Equities',
+        tag: 'HIGH RISK • GROWTH',
+        gradient: 'from-[#5C6CFF] to-[#1a237e]',
+        description: 'ลงทุนในหุ้นเทคโนโลยีทั่วโลก มีศักยภาพเติบโตสูง แต่มีความผันผวนมาก เหมาะสำหรับผู้ที่รับความเสี่ยงได้และมีระยะเวลาลงทุนยาว'
+    },
+    dividend: {
+        title: 'Dividend Income Fund',
+        subtitle: 'High Dividend Yield Stocks',
+        tag: 'MEDIUM RISK • INCOME',
+        gradient: 'from-[#F5B947] to-[#F97316]',
+        description: 'ลงทุนในหุ้นจ่ายเงินปันผลสม่ำเสมอ สร้างกระแสเงินสดระหว่างทาง ความเสี่ยงปานกลาง เหมาะสำหรับผู้ที่ต้องการรายได้ประจำ'
+    }
+};
+
+function openAssetDetail(type) {
+    const asset = assetDetails[type];
+    const data = AppData.portfolio[type];
+    
+    const sheet = document.getElementById('asset-modal');
+    const header = document.getElementById('modal-header-bg');
+    const tag = document.getElementById('modal-tag');
+    
+    // Update content
+    document.getElementById('modal-title').textContent = asset.title;
+    document.getElementById('modal-subtitle').textContent = asset.subtitle;
+    document.getElementById('modal-price').textContent = '฿ ' + data.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('modal-avg-cost').textContent = '฿ ' + data.avgCost.toFixed(2);
+    document.getElementById('modal-pl').textContent = (data.change >= 0 ? '+ ' : '- ') + '฿ ' + Math.abs(data.change).toFixed(2);
+    document.getElementById('modal-units').textContent = data.units.toFixed(2);
+    document.getElementById('modal-current-price').textContent = '฿ ' + (data.value / data.units).toFixed(2);
+    document.getElementById('modal-description').textContent = asset.description;
+    
+    const changePercent = ((data.change / (data.value - data.change)) * 100).toFixed(1);
+    const changeEl = document.getElementById('modal-change');
+    changeEl.innerHTML = `<i class="fa-solid fa-caret-${data.change >= 0 ? 'up' : 'down'}"></i> ${Math.abs(changePercent)}%`;
+    changeEl.className = `text-sm font-bold ${data.change >= 0 ? 'text-[#00d26a] bg-[#00d26a]/10' : 'text-[#ef4444] bg-[#ef4444]/10'} px-2 py-1 rounded flex items-center gap-1`;
+    
+    // Update styling
+    header.className = `h-44 bg-gradient-to-br ${asset.gradient} relative p-6 flex flex-col justify-end rounded-t-[30px]`;
+    tag.textContent = asset.tag;
+    
+    // Store current asset for buy/sell
+    sheet.dataset.assetType = type;
+    
+    renderAssetSparkline();
+    sheet.classList.add('active');
+    document.getElementById('main-overlay').classList.add('active');
+}
+
+function buyAsset() {
+    const type = document.getElementById('asset-modal').dataset.assetType;
+    closeAllModals();
+    setTimeout(() => {
+        document.getElementById('deposit-target').value = type;
+        openDeposit();
+    }, 300);
+}
+
+function sellAsset() {
+    const type = document.getElementById('asset-modal').dataset.assetType;
+    closeAllModals();
+    setTimeout(() => {
+        document.getElementById('withdraw-source').value = type;
+        openWithdraw();
+    }, 300);
+}
+
+// ========== MARKET SIMULATION ==========
+let marketInterval;
+
+function simulateLiveMarket() {
+    marketInterval = setInterval(() => {
+        // Update growth fund (more volatile)
+        const growthChange = (Math.random() - 0.45) * 30;
+        AppData.portfolio.growth.value += growthChange;
+        AppData.portfolio.growth.change += growthChange;
+        
+        // Update dividend fund
+        const dividendChange = (Math.random() - 0.47) * 15;
+        AppData.portfolio.dividend.value += dividendChange;
+        AppData.portfolio.dividend.change += dividendChange;
+        
+        // Update safe fund (minimal movement)
+        const safeChange = (Math.random() - 0.49) * 2;
+        AppData.portfolio.safe.value += safeChange;
+        AppData.portfolio.safe.change += safeChange;
+        
+        updatePortfolio();
+    }, 3000);
+}
+
+function updatePortfolio() {
+    const total = AppData.portfolio.safe.value + AppData.portfolio.growth.value + AppData.portfolio.dividend.value;
+    const totalChange = AppData.portfolio.safe.change + AppData.portfolio.growth.change + AppData.portfolio.dividend.change;
+    const totalChangePercent = (totalChange / (total - totalChange)) * 100;
+    
+    // Update main balance
+    const balanceEl = document.getElementById('total-balance');
+    if (balanceEl) {
+        balanceEl.textContent = '฿ ' + total.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+    
+    // Update change
+    const changeAmountEl = document.getElementById('change-amount');
+    const changePercentEl = document.getElementById('change-percent');
+    const changeContainer = document.getElementById('total-change');
+    
+    if (changeAmountEl && changePercentEl && changeContainer) {
+        changeAmountEl.textContent = '฿ ' + Math.abs(totalChange).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        changePercentEl.textContent = Math.abs(totalChangePercent).toFixed(1) + '%';
+        
+        const icon = changeContainer.querySelector('i');
+        
+        if (totalChange >= 0) {
+            changeContainer.className = 'text-sm font-bold text-[#00d26a] bg-[#00d26a]/10 px-2 py-0.5 rounded flex items-center gap-1 border border-[#00d26a]/20';
+            icon.className = 'fa-solid fa-caret-up';
+        } else {
+            changeContainer.className = 'text-sm font-bold text-[#ef4444] bg-[#ef4444]/10 px-2 py-0.5 rounded flex items-center gap-1 border border-[#ef4444]/20';
+            icon.className = 'fa-solid fa-caret-down';
+        }
+    }
+    
+    // Update individual assets
+    const safeValue = document.getElementById('safe-value');
+    const safeChange = document.getElementById('safe-change');
+    if (safeValue) safeValue.textContent = '฿ ' + AppData.portfolio.safe.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (safeChange) {
+        safeChange.textContent = (AppData.portfolio.safe.change >= 0 ? '+' : '') + AppData.portfolio.safe.change.toFixed(2);
+        safeChange.className = `text-[10px] font-eng ${AppData.portfolio.safe.change >= 0 ? 'text-[#00d26a]' : 'text-[#ef4444]'}`;
+    }
+    
+    const growthValue = document.getElementById('growth-value');
+    const growthChange = document.getElementById('growth-change');
+    if (growthValue) growthValue.textContent = '฿ ' + AppData.portfolio.growth.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (growthChange) {
+        growthChange.textContent = (AppData.portfolio.growth.change >= 0 ? '+' : '') + AppData.portfolio.growth.change.toFixed(2);
+        growthChange.className = `text-[10px] font-eng live-num ${AppData.portfolio.growth.change >= 0 ? 'text-[#00d26a]' : 'text-[#ef4444]'}`;
+    }
+    
+    const dividendValue = document.getElementById('dividend-value');
+    const dividendChange = document.getElementById('dividend-change');
+    if (dividendValue) dividendValue.textContent = '฿ ' + AppData.portfolio.dividend.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (dividendChange) {
+        dividendChange.textContent = (AppData.portfolio.dividend.change >= 0 ? '+' : '') + AppData.portfolio.dividend.change.toFixed(2);
+        dividendChange.className = `text-[10px] font-eng ${AppData.portfolio.dividend.change >= 0 ? 'text-[#00d26a]' : 'text-[#ef4444]'}`;
+    }
+}
+
+// ========== SPARKLINE IN MODAL ==========
+function renderAssetSparkline() {
+    const container = document.getElementById('asset-sparkline');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const bars = 30;
+    for (let i = 0; i < bars; i++) {
+        const bar = document.createElement('div');
+        const h = Math.floor(Math.random() * 60) + 20;
+        let color = Math.random() > 0.4 ? '#00d26a' : '#ef4444';
+        if (i > 25) color = '#00d26a'; // Recent trend up
+        
+        bar.style.flex = '1';
+        bar.style.height = h + '%';
+        bar.style.background = color;
+        bar.style.borderRadius = '2px';
+        bar.style.opacity = (i + 5) / 35;
+        bar.style.transition = 'all 0.3s ease';
+        container.appendChild(bar);
+    }
+}
+
+// ========== CHARTS ==========
+let mainChart, safeAllocationChart;
+let chartPeriod = '1W';
+
+function initMainChart() {
+    const canvas = document.getElementById('mainChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(30, 198, 201, 0.4)');
+    gradient.addColorStop(1, 'rgba(30, 198, 201, 0)');
+
+    const chartData = getChartData('1W');
+
+    mainChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                data: chartData.data,
+                borderColor: '#1EC6C9',
+                borderWidth: 3,
+                backgroundColor: gradient,
+                fill: true,
+                pointBackgroundColor: '#02040a',
+                pointBorderColor: '#1EC6C9',
+                pointBorderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(20, 25, 40, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#1EC6C9',
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: (context) => '฿' + context.parsed.y.toLocaleString()
+                    }
+                }
+            },
+            scales: { 
+                x: { 
+                    display: true,
+                    grid: { display: false },
+                    ticks: { color: '#6B7280', font: { size: 10 } }
+                }, 
+                y: { 
+                    display: false,
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                } 
+            },
+            interaction: { mode: 'index', intersect: false }
+        }
+    });
+}
+
+function getChartData(period) {
+    const baseValue = 11600;
+    const volatility = { '1W': 50, '1M': 150, '1Y': 800 };
+    const points = { '1W': 7, '1M': 30, '1Y': 12 };
+    
+    const labels = {
+        '1W': ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        '1M': Array.from({length: 30}, (_, i) => (i + 1).toString()),
+        '1Y': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    };
+    
+    const data = [];
+    let current = baseValue;
+    
+    for (let i = 0; i < points[period]; i++) {
+        current += (Math.random() - 0.35) * volatility[period];
+        data.push(Math.round(current));
+    }
+    
+    return { labels: labels[period], data };
+}
+
+function changeChartPeriod(period, btn) {
+    chartPeriod = period;
+    
+    // Update button states
+    document.querySelectorAll('.chart-period').forEach(b => {
+        b.classList.remove('text-[#1EC6C9]', 'border-b', 'border-[#1EC6C9]');
+        b.classList.add('text-gray-600');
+    });
+    btn.classList.add('text-[#1EC6C9]', 'border-b', 'border-[#1EC6C9]');
+    btn.classList.remove('text-gray-600');
+    
+    // Update chart
+    const newData = getChartData(period);
+    mainChart.data.labels = newData.labels;
+    mainChart.data.datasets[0].data = newData.data;
+    mainChart.update('active');
+}
+
+function initSafeAllocationChart() {
+    const canvas = document.getElementById('safeAllocationChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    safeAllocationChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Gov. Bonds', 'Corp. Bonds', 'Money Market'],
+            datasets: [{
+                data: [50, 30, 20],
+                backgroundColor: [
+                    'rgba(34,197,94,0.9)',
+                    'rgba(59,130,246,0.9)',
+                    'rgba(148,163,184,0.9)'
+                ],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#9CA3AF',
+                        font: { size: 10, family: 'Inter' },
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(20, 25, 40, 0.95)',
+                    padding: 12,
+                    callbacks: {
+                        label: (context) => context.label + ': ' + context.parsed + '%'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ========== GROWTH PLAN DETAIL (RISK LANES) ==========
+const growthPlans = {
+    chill: {
+        title: "Chill Plan – โหมดเริ่มต้น สินทรัพย์เสี่ยงต่ำเท่านั้น",
+        body: `
+            ใช้สำหรับนักศึกษาที่อยากเริ่มลงทุน แต่ยังไม่อยากเจอพอร์ตเหวี่ยงเยอะ<br><br>
+            เมื่อเลือก <b>Chill</b> แล้ว หน้า "เลือกซื้อ" ของ Nuvestra Growth จะโชว์เฉพาะสินทรัพย์ความเสี่ยงต่ำ
+            เช่น กองทุนตลาดเงิน, กองทุนตราสารหนี้, กองทุนผสมที่มีความผันผวนต่ำเท่านั้น<br><br>
+            หมายความว่า เด็กจะ <b>ไม่เห็น</b> หุ้น/กองทุนสายเสี่ยงแรงในโหมดนี้เลย 
+            Universe ของสินทรัพย์ถูกล็อกไว้ให้ปลอดภัยเป็นหลัก
+        `,
+        note: "เลนเริ่มต้นสำหรับปี 1–2 หรือผู้ปกครองที่อยากให้ลองลงทุน แต่ยังอยากคุมกรอบความเสี่ยงชัดเจน"
+    },
+    balance: {
+        title: "Balance Plan – ผสมกลาง + ต่ำ ให้ลองโตแบบคุมได้",
+        body: `
+            เหมาะสำหรับนักศึกษาที่เริ่มคุ้นกับตลาด และยอมรับความผันผวนได้มากขึ้นเล็กน้อย<br><br>
+            เมื่อเลือก <b>Balance</b> แล้ว หน้า "เลือกซื้อ" จะมีทั้งสินทรัพย์ความเสี่ยงต่ำ 
+            <b>และ</b> สินทรัพย์ความเสี่ยงกลาง เช่น กองทุนหุ้นกว้าง, sector ที่ไม่ extreme 
+            โดยยังไม่ปล่อยสินทรัพย์เสี่ยงสูงสุดเข้ามาใน universe นี้<br><br>
+            เด็กจึงได้ฝึกจัดพอร์ตเอง ระหว่าง low / medium risk แต่ยังอยู่ในกรอบที่คัดมาแล้วว่าไม่แรงเกินไป
+        `,
+        note: "ภาพรวม: universe มี low + medium เท่านั้น • ไม่มี high-risk thematic ให้ซื้อในโหมดนี้"
+    },
+    bold: {
+        title: "Bold Plan – เปิดเต็มชั้นวาง (สูง + กลาง + ต่ำ)",
+        body: `
+            สำหรับนักศึกษาที่ตั้งใจมาลอง "ห้องเรียนความเสี่ยงจริง" และเข้าใจแล้วว่าพอร์ตอาจเหวี่ยงแรงได้<br><br>
+            เมื่อเลือก <b>Bold</b> แล้ว หน้า "เลือกซื้อ" จะเปิด universe ครบทั้งสามระดับความเสี่ยง 
+            ตั้งแต่กองทุนตลาดเงิน/ตราสารหนี้ (ต่ำ), กองทุนหุ้น/sector ทั่วไป (กลาง), 
+            ไปจนถึงธีมเติบโตและ Thematic ETF (สูง) เช่น Tech, Innovation, New Economy เป็นต้น<br><br>
+            Nuvestra สามารถกำหนดกติกาเพิ่มเติมได้ เช่น ต้องมีสินทรัพย์เสี่ยงต่ำอย่างน้อย X% 
+            หรือจำกัดวงเงินต่อดีลเสี่ยงสูง เพื่อให้ Bold เป็นการ "ลองเสี่ยงบนรางที่ออกแบบแล้ว" ไม่ใช่ปล่อยฟรีสไตล์
+        `,
+        note: "ใช้สำหรับนักศึกษาที่พร้อมทำความเข้าใจความผันผวนจริง ๆ และเรียนรู้ผ่าน Market Story ที่แพลตฟอร์มเล่าให้"
+    }
+};
+
+// Investment assets database with risk levels
+const investmentAssets = [
+    // LOW RISK - Available in Chill, Balance, Bold
+    { 
+        id: 'gov-bond', 
+        name: 'Government Bond Fund', 
+        nameLocal: 'กองทุนตราสารหนี้รัฐบาล',
+        risk: 'low', 
+        riskLabel: 'Low Risk',
+        type: 'Bond',
+        icon: 'landmark',
+        color: '#22C55E',
+        expectedReturn: '2-4% ต่อปี',
+        minInvest: 500,
+        description: 'ลงทุนในพันธบัตรรัฐบาล ปลอดภัยสูง เหมาะสำหรับเงินที่ต้องการรักษามูลค่า'
+    },
+    { 
+        id: 'money-market', 
+        name: 'Money Market Fund', 
+        nameLocal: 'กองทุนตลาดเงิน',
+        risk: 'low', 
+        riskLabel: 'Low Risk',
+        type: 'Money Market',
+        icon: 'coins',
+        color: '#22C55E',
+        expectedReturn: '1.5-2.5% ต่อปี',
+        minInvest: 100,
+        description: 'สภาพคล่องสูง ความเสี่ยงต่ำมาก เหมาะสำหรับเงินสำรอง'
+    },
+    { 
+        id: 'corp-bond', 
+        name: 'Corporate Bond Fund', 
+        nameLocal: 'กองทุนตราสารหนี้เอกชน',
+        risk: 'low', 
+        riskLabel: 'Low Risk',
+        type: 'Bond',
+        icon: 'building',
+        color: '#22C55E',
+        expectedReturn: '3-5% ต่อปี',
+        minInvest: 1000,
+        description: 'ลงทุนในหุ้นกู้บริษัทชั้นนำ ผลตอบแทนสูงกว่าพันธบัตรรัฐเล็กน้อย'
+    },
+    
+    // MEDIUM RISK - Available in Balance, Bold
+    { 
+        id: 'dividend-equity', 
+        name: 'Dividend Equity Fund', 
+        nameLocal: 'กองทุนหุ้นปันผล',
+        risk: 'medium', 
+        riskLabel: 'Medium Risk',
+        type: 'Equity',
+        icon: 'chart-line',
+        color: '#F59E0B',
+        expectedReturn: '5-8% ต่อปี',
+        minInvest: 1000,
+        description: 'ลงทุนในหุ้นจ่ายปันผลสม่ำเสมอ ผันผวนปานกลาง เหมาะสร้างรายได้ระหว่างทาง'
+    },
+    { 
+        id: 'index-fund', 
+        name: 'SET Index Fund', 
+        nameLocal: 'กองทุนดัชนี SET',
+        risk: 'medium', 
+        riskLabel: 'Medium Risk',
+        type: 'Equity',
+        icon: 'chart-area',
+        color: '#F59E0B',
+        expectedReturn: '6-10% ต่อปี',
+        minInvest: 500,
+        description: 'ตามดัชนีตลาดหุ้นไทย กระจายความเสี่ยงในหุ้นหลักทั้งตลาด'
+    },
+    { 
+        id: 'asia-equity', 
+        name: 'Asia Equity Fund', 
+        nameLocal: 'กองทุนหุ้นเอเชีย',
+        risk: 'medium', 
+        riskLabel: 'Medium Risk',
+        type: 'Equity',
+        icon: 'globe-asia',
+        color: '#F59E0B',
+        expectedReturn: '7-12% ต่อปี',
+        minInvest: 1000,
+        description: 'ลงทุนในหุ้นเอเชีย รับโอกาสเติบโตของภูมิภาค'
+    },
+    { 
+        id: 'balanced-fund', 
+        name: 'Balanced Fund', 
+        nameLocal: 'กองทุนผสม',
+        risk: 'medium', 
+        riskLabel: 'Medium Risk',
+        type: 'Mixed',
+        icon: 'scale-balanced',
+        color: '#F59E0B',
+        expectedReturn: '4-7% ต่อปี',
+        minInvest: 500,
+        description: 'ผสมหุ้นและพันธบัตร ปรับสัดส่วนตามสภาวะตลาด'
+    },
+    
+    // HIGH RISK - Available in Bold only
+    { 
+        id: 'tech-growth', 
+        name: 'Tech Growth ETF', 
+        nameLocal: 'กองทุนหุ้นเทคโนโลยี',
+        risk: 'high', 
+        riskLabel: 'High Risk',
+        type: 'Thematic',
+        icon: 'microchip',
+        color: '#EF4444',
+        expectedReturn: '10-20% ต่อปี (ผันผวนสูง)',
+        minInvest: 1000,
+        description: 'ลงทุนในหุ้น Tech ทั่วโลก ผลตอบแทนสูง แต่ผันผวนมาก'
+    },
+    { 
+        id: 'innovation', 
+        name: 'Innovation Fund', 
+        nameLocal: 'กองทุนนวัตกรรม',
+        risk: 'high', 
+        riskLabel: 'High Risk',
+        type: 'Thematic',
+        icon: 'lightbulb',
+        color: '#EF4444',
+        expectedReturn: '12-25% ต่อปี (ผันผวนสูง)',
+        minInvest: 2000,
+        description: 'ลงทุนในบริษัทนวัตกรรมและ Disruptive Technology'
+    },
+    { 
+        id: 'emerging-markets', 
+        name: 'Emerging Markets Fund', 
+        nameLocal: 'กองทุนตลาดเกิดใหม่',
+        risk: 'high', 
+        riskLabel: 'High Risk',
+        type: 'Equity',
+        icon: 'rocket',
+        color: '#EF4444',
+        expectedReturn: '8-18% ต่อปี (ผันผวนสูง)',
+        minInvest: 1500,
+        description: 'ลงทุนในตลาดเกิดใหม่ มีโอกาสเติบโตสูง แต่มีความเสี่ยงสูงตาม'
+    },
+    { 
+        id: 'crypto-exposure', 
+        name: 'Crypto Exposure Fund', 
+        nameLocal: 'กองทุนคริปโต',
+        risk: 'high', 
+        riskLabel: 'High Risk',
+        type: 'Alternative',
+        icon: 'bitcoin-sign',
+        color: '#EF4444',
+        expectedReturn: '15-30% ต่อปี (ผันผวนสูงมาก)',
+        minInvest: 2000,
+        description: 'ลงทุนในสินทรัพย์คริปโตผ่าน ETF ความเสี่ยงสูงสุด'
+    }
+];
+
+// Risk lane configuration
+const riskLaneAccess = {
+    chill: ['low'],
+    balance: ['low', 'medium'],
+    bold: ['low', 'medium', 'high']
+};
+
+function selectGrowthPlan(key) {
+    const detail = document.getElementById('growth-plan-detail');
+    if (!detail || !growthPlans[key]) return;
+    const { title, body, note } = growthPlans[key];
+
+    // Update user preference
+    AppData.user.currentPlan = key;
+
+    // Highlight cards
+    ['chill', 'balance', 'bold'].forEach(k => {
+        const el = document.getElementById('plan-' + k);
+        if (!el) return;
+        if (k === key) {
+            el.classList.add('border-[#1EC6C9]');
+            el.classList.remove('border-transparent');
+        } else {
+            el.classList.remove('border-[#1EC6C9]');
+            el.classList.add('border-transparent');
+        }
+    });
+
+    detail.innerHTML = `
+        <div class="text-xs text-[#1EC6C9] font-semibold mb-1">Selected Plan</div>
+        <div class="text-sm font-semibold mb-2">${title}</div>
+        <div class="text-[11px] text-gray-200 mb-3">${body}</div>
+        <div class="text-[10px] text-gray-400 border-t border-white/5 pt-2 mt-2">${note}</div>
+    `;
+    
+    // Update available assets based on risk lane
+    renderAvailableAssets(key);
+    
+    showToast(`Growth plan changed to ${key.charAt(0).toUpperCase() + key.slice(1)}`);
+}
+
+function renderAvailableAssets(plan) {
+    const container = document.getElementById('available-assets-grid');
+    const titleEl = document.getElementById('available-assets-title');
+    
+    if (!container || !titleEl) return;
+    
+    // Get allowed risk levels for this plan
+    const allowedRisks = riskLaneAccess[plan];
+    
+    // Filter assets by risk level
+    const availableAssets = investmentAssets.filter(asset => 
+        allowedRisks.includes(asset.risk)
+    );
+    
+    // Update title
+    const planNames = { chill: 'Chill', balance: 'Balance', bold: 'Bold' };
+    titleEl.textContent = `Available Assets in ${planNames[plan]} Plan (${availableAssets.length} funds)`;
+    
+    // Render asset cards
+    container.innerHTML = availableAssets.map(asset => {
+        const riskColors = {
+            low: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/40' },
+            medium: { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/40' },
+            high: { bg: 'bg-rose-500/15', text: 'text-rose-400', border: 'border-rose-500/40' }
+        };
+        const colors = riskColors[asset.risk];
+        
+        return `
+            <button class="glass-card p-4 rounded-2xl text-left btn-press hover:border hover:border-[#1EC6C9]/30 transition-all"
+                onclick="openInvestModal('${asset.id}')">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: ${asset.color}15">
+                            <i class="fa-solid fa-${asset.icon} text-xl" style="color: ${asset.color}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-bold">${escapeHTML(asset.nameLocal)}</div>
+                            <div class="text-[10px] text-gray-400 font-eng">${escapeHTML(asset.name)}</div>
+                        </div>
+                    </div>
+                    <span class="risk-pill ${colors.bg} ${colors.text} border ${colors.border} whitespace-nowrap">
+                        ${escapeHTML(asset.riskLabel)}
+                    </span>
+                </div>
+                
+                <div class="space-y-1 mb-3">
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Type:</span>
+                        <span class="font-semibold">${escapeHTML(asset.type)}</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Expected return:</span>
+                        <span class="font-semibold text-[#1EC6C9]">${escapeHTML(asset.expectedReturn)}</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-gray-400">Min. invest:</span>
+                        <span class="font-semibold font-eng">฿${asset.minInvest.toLocaleString()}</span>
+                    </div>
+                </div>
+                
+                    <div class="text-[10px] text-gray-400 mb-3 leading-relaxed">
+                    ${escapeHTML(asset.description)}
+                    </div>
+                
+                <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                    <span class="text-[10px] text-gray-500">Click to invest</span>
+                    <i class="fa-solid fa-arrow-right text-[#1EC6C9] text-xs"></i>
+                </div>
+            </button>
+        `;
+    }).join('');
+    
+    // Show locked message if assets were filtered out
+    const lockedCount = investmentAssets.length - availableAssets.length;
+    if (lockedCount > 0) {
+        container.innerHTML += `
+            <div class="glass-card p-4 rounded-2xl border border-dashed border-gray-700">
+                <div class="flex items-center gap-3 text-gray-500">
+                    <i class="fa-solid fa-lock text-2xl"></i>
+                    <div>
+                        <div class="text-sm font-semibold">${lockedCount} assets locked</div>
+                        <div class="text-[10px] text-gray-400">
+                            Switch to ${plan === 'chill' ? 'Balance or Bold' : 'Bold'} plan to unlock higher risk assets
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Investment modal
+function openInvestModal(assetId) {
+    const asset = investmentAssets.find(a => a.id === assetId);
+    if (!asset) return;
+    
+    // Store selected asset
+    window.selectedInvestAsset = asset;
+    
+    const modal = document.getElementById('invest-modal');
+    if (!modal) return;
+    
+    // Update modal content
+    document.getElementById('invest-asset-name').textContent = asset.nameLocal;
+    document.getElementById('invest-asset-subtitle').textContent = asset.name;
+    document.getElementById('invest-min-amount').textContent = asset.minInvest;
+    document.getElementById('invest-amount').value = asset.minInvest;
+    document.getElementById('invest-amount').min = asset.minInvest;
+    
+    const riskColors = {
+        low: 'from-[#22C55E] to-[#15803d]',
+        medium: 'from-[#F59E0B] to-[#D97706]',
+        high: 'from-[#EF4444] to-[#DC2626]'
+    };
+    document.getElementById('invest-header-bg').className = 
+        `h-44 bg-gradient-to-br ${riskColors[asset.risk]} relative p-6 flex flex-col justify-end rounded-t-[30px]`;
+    
+    modal.classList.add('active');
+    document.getElementById('main-overlay').classList.add('active');
+}
+
+function executeInvestment() {
+    const asset = window.selectedInvestAsset;
+    if (!asset) return;
+    
+    const amount = parseFloat(document.getElementById('invest-amount').value);
+    
+    if (!amount || amount < asset.minInvest) {
+        showToast(`Minimum investment is ฿${asset.minInvest}`, 'error');
+        return;
+    }
+    
+    // Check if plan allows this asset
+    const allowedRisks = riskLaneAccess[AppData.user.currentPlan];
+    if (!allowedRisks.includes(asset.risk)) {
+        showToast(`This asset is not available in your current ${AppData.user.currentPlan} plan`, 'error');
+        return;
+    }
+    
+    // Add transaction
+    AppData.transactions.unshift({
+        id: AppData.transactions.length + 1,
+        type: 'buy',
+        asset: asset.id,
+        assetName: asset.nameLocal,
+        amount: amount,
+        date: new Date(),
+        status: 'completed'
+    });
+    
+    // Add notification
+    AppData.notifications.unshift({
+        id: AppData.notifications.length + 1,
+        title: 'Investment Successful',
+        message: `Invested ฿${amount.toLocaleString()} in ${asset.nameLocal}`,
+        time: 'Just now',
+        read: false,
+        type: 'success'
+    });
+    updateNotificationBadge();
+    
+    closeAllModals();
+    showToast(`Successfully invested ฿${amount.toLocaleString()} in ${asset.nameLocal}!`);
+    
+    // Clear form
+    document.getElementById('invest-amount').value = '';
+}
+
+// ========== DOM READY ==========
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize data
+    initializeData();
+    
+    // Initialize charts
+    initMainChart();
+    initSafeAllocationChart();
+    
+    // Initialize UI
+    updatePortfolio();
+    renderQuests();
+    renderRewards();
+    renderRecentTransactions();
+    updateNotificationBadge();
+    selectGrowthPlan('balance'); // Default plan - this will also render available assets
+    
+    // Mode toggle handlers
+    const modeStudent = document.getElementById('mode-student');
+    const modeInvestor = document.getElementById('mode-investor');
+    if (modeStudent && modeInvestor) {
+        modeStudent.addEventListener('click', () => {
+            const homeBtn = document.querySelector('.nav-btn:nth-child(1)');
+            if (homeBtn) switchTab('dashboard', homeBtn);
+        });
+        modeInvestor.addEventListener('click', () => {
+            const profileBtn = document.querySelector('.nav-btn:nth-child(5)');
+            if (profileBtn) switchTab('profile', profileBtn);
+        });
+    }
+    
+    // Close modals on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllModals();
+    });
+    
+    // Smooth scroll behavior
+    const scrollContainer = document.getElementById('scroll-container');
+    if (scrollContainer) {
+        scrollContainer.style.scrollBehavior = 'smooth';
+    }
+    
+    // Production: debug logs removed
+});
+
+// ========== GLOBAL ERROR HANDLER ==========
+window.addEventListener('error', (e) => {
+    console.error('Global error:', e.error);
+    // Don't show toast for every error, just log it
+});
+
+// ========== CLEANUP ==========
+window.addEventListener('beforeunload', () => {
+    if (marketInterval) clearInterval(marketInterval);
+    if (mainChart) mainChart.destroy();
+    if (safeAllocationChart) safeAllocationChart.destroy();
+});
+</script>
+
+</body>
+</html>
